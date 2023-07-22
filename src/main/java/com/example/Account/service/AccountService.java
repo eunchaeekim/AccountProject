@@ -14,7 +14,9 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static com.example.Account.domain.AccountStatus.IN_USE;
 
@@ -96,12 +98,16 @@ public class AccountService {
         }
     }
     @Transactional
-    public Account getAccount(Long id) {
+    public List<AccountDto> getAccountByUserId(Long userId) {
+        AccountUser accountUser = accountUserRepository.findById(userId)
+                .orElseThrow(() -> new AccountException(ErrorCode.USER_NOT_FOUND));
 
-        if (id < 0) {
-            throw new RuntimeException("Minus");
-        }
-        return accountRepository.findById(id).get();
+        List<Account> accounts = accountRepository
+                .findByAccountUser(accountUser);
+
+        return accounts.stream()
+                .map(AccountDto::fromEntity)
+                .collect(Collectors.toList());
     }
 
 }

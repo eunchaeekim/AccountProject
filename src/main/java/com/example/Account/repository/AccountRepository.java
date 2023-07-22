@@ -24,4 +24,7 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     // 계좌가 10개(사용자당 최대 보유 가능 계좌 수)인 경우 실패 응답
     Integer countByAccountUser(AccountUser accountUser);
 
+    Optional<Account> findByAccountNumber(String accountNumber);
+
+
 }

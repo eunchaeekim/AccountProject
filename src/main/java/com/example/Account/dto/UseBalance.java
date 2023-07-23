@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 public class UseBalance {
     @Getter
     @Setter
+    @NoArgsConstructor
     @AllArgsConstructor
     public static class Request implements AccountLockIdInterface {
         @NotNull

@@ -19,6 +19,7 @@ public class CancelBalance {
     @Getter
     @Setter
     @AllArgsConstructor
+    @NoArgsConstructor
     public static class Request implements AccountLockIdInterface {
         @NotBlank
         private String transactionId;

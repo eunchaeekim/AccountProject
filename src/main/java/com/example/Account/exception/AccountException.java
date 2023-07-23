@@ -1,6 +1,5 @@
 package com.example.Account.exception;
 
-
 import com.example.Account.type.ErrorCode;
 import lombok.*;
 
@@ -10,7 +9,6 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class AccountException extends RuntimeException {
-
     private ErrorCode errorCode;
     private String errorMessage;
 
@@ -18,5 +16,4 @@ public class AccountException extends RuntimeException {
         this.errorCode = errorCode;
         this.errorMessage = errorCode.getDescription();
     }
-
 }

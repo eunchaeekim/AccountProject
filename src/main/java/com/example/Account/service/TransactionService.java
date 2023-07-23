@@ -1,7 +1,6 @@
 package com.example.Account.service;
 
 import com.example.Account.domain.Account;
-import com.example.Account.domain.AccountStatus;
 import com.example.Account.domain.AccountUser;
 import com.example.Account.domain.Transaction;
 import com.example.Account.dto.TransactionDto;
@@ -9,8 +8,10 @@ import com.example.Account.exception.AccountException;
 import com.example.Account.repository.AccountRepository;
 import com.example.Account.repository.AccountUserRepository;
 import com.example.Account.repository.TransactionRepository;
+import com.example.Account.type.AccountStatus;
 import com.example.Account.type.ErrorCode;
 import com.example.Account.type.TransactionResultType;
+import com.example.Account.type.TransactionType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -51,37 +52,15 @@ public class TransactionService {
 
         account.useBalance(amount);
 
-        return TransactionDto.fromEntity(saveAndGetTransaction(S, account, amount));
+        return TransactionDto.fromEntity(saveAndGetTransaction(USE, S, account, amount));
     }
 
+    @Transactional
+    public void saveFailedUseTransaction(String accountNumber, Long amount) {
+        Account account = accountRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(() -> new AccountException(ErrorCode.ACCOUNT_NOT_FOUND));
 
-    private void validateUseBalance(AccountUser user, Account account, Long amount) {
-        if (!Objects.equals(user.getId(), account.getAccountUser().getId())) {
-            throw new AccountException(ErrorCode.USER_ACCOUNT_UN_MATCH);
-        }
-        if (account.getAccountStatus() != AccountStatus.IN_USE) {
-            throw new AccountException(ErrorCode.ACCOUNT_ALREADY_UNREGISTERED);
-        }
-        if (account.getBalance() < amount) {
-            throw new AccountException(ErrorCode.AMOUNT_EXCEED_BALANCE);
-        }
-    }
-
-    private Transaction saveAndGetTransaction(
-            TransactionResultType transactionResultType,
-            Account account,
-            Long amount) {
-        return transactionRepository.save(
-                Transaction.builder()
-                        .transactionType(USE)
-                        .transactionResultType(transactionResultType)
-                        .account(account)
-                        .amount(amount)
-                        .balanceSnapshot(account.getBalance())
-                        .transactionId(UUID.randomUUID().toString().replace("-", ))
-                        .transactedAt(LocalDateTime.now())
-                        .build()
-        )
+        saveAndGetTransaction(USE, F, account, amount);
     }
 
     @Transactional
@@ -105,18 +84,6 @@ public class TransactionService {
         );
     }
 
-    private void validateCancelBalance(Transaction transaction, Account account, Long amount) {
-        if (!Objects.equals(transaction.getAccount().getId(), account.getId())) {
-            throw new AccountException(ErrorCode.TRANSACTION_ACCOUNT_UN_MATCH);
-        }
-        if (!Objects.equals(transaction.getAmount(), amount)) {
-            throw new AccountException(ErrorCode.CANCEL_MUST_FULLY);
-        }
-        if (transaction.getTransactedAt().isBefore(LocalDateTime.now().minusYears(1))) {
-            throw new AccountException(ErrorCode.TOO_OLD_ORDER_TO_CANCEL);
-        }
-
-    }
     @Transactional
     public void saveFailedCancelTransaction(String accountNumber, Long amount) {
         Account account = accountRepository.findByAccountNumber(accountNumber)
@@ -130,11 +97,45 @@ public class TransactionService {
                 .orElseThrow(() -> new AccountException(ErrorCode.TRANSACTION_NOT_FOUND))
         );
     }
-}
 
+    private Transaction saveAndGetTransaction(
+            TransactionType transactionType,
+            TransactionResultType transactionResultType,
+            Account account, Long amount) {
+        return transactionRepository.save(
+                Transaction.builder()
+                        .transactionType(transactionType)
+                        .transactionResultType(transactionResultType)
+                        .account(account)
+                        .amount(amount)
+                        .balanceSnapshot(account.getBalance())
+                        .transactionId(UUID.randomUUID().toString().replace("-", ""))
+                        .transactedAt(LocalDateTime.now())
+                        .build()
+        );
+    }
 
+    private void validateUseBalance(AccountUser user, Account account, Long amount) {
+        if (!Objects.equals(user.getId(), account.getAccountUser().getId())) {
+            throw new AccountException(ErrorCode.USER_ACCOUNT_UN_MATCH);
+        }
+        if (account.getAccountStatus() != AccountStatus.IN_USE) {
+            throw new AccountException(ErrorCode.ACCOUNT_ALREADY_UNREGISTERED);
+        }
+        if (account.getBalance() < amount) {
+            throw new AccountException(ErrorCode.AMOUNT_EXCEED_BALANCE);
+        }
+    }
 
-
-
-
+    private void validateCancelBalance(Transaction transaction, Account account, Long amount) {
+        if (!Objects.equals(transaction.getAccount().getId(), account.getId())) {
+            throw new AccountException(ErrorCode.TRANSACTION_ACCOUNT_UN_MATCH);
+        }
+        if (!Objects.equals(transaction.getAmount(), amount)) {
+            throw new AccountException(ErrorCode.CANCEL_MUST_FULLY);
+        }
+        if (transaction.getTransactedAt().isBefore(LocalDateTime.now().minusYears(1))) {
+            throw new AccountException(ErrorCode.TOO_OLD_ORDER_TO_CANCEL);
+        }
+    }
 }

@@ -1,10 +1,11 @@
 package com.example.Account.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import com.example.Account.aop.AccountLockIdInterface;
+import com.example.Account.type.TransactionResultType;
+import lombok.*;
 
 import javax.validation.constraints.*;
+import java.time.LocalDateTime;
 
 public class CancelBalance {
 
@@ -18,7 +19,7 @@ public class CancelBalance {
     @Getter
     @Setter
     @AllArgsConstructor
-    public static class Request {
+    public static class Request implements AccountLockIdInterface {
         @NotBlank
         private String transactionId;
 
@@ -32,4 +33,35 @@ public class CancelBalance {
         private Long amount;
     }
 
+    /**
+     * {
+     *     "accountNumber" : "123456789",
+     *     "transactionResult": "S",
+     *     "transactionId": "dsfjsldf"
+     *     "amount": 1000,
+     *     "transactedAt": dsf
+     * }
+     */
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class Response {
+        private String accountNumber;
+        private TransactionResultType transactionResult;
+        private String transactionId;
+        private Long amount;
+        private LocalDateTime transactedAt;
+
+        public static CancelBalance.Response from(TransactionDto transactionDto) {
+            return CancelBalance.Response.builder()
+                    .accountNumber(transactionDto.getAccountNumber())
+                    .transactionResult(transactionDto.getTransactionResultType())
+                    .transactionId(transactionDto.getTransactionId())
+                    .amount(transactionDto.getAmount())
+                    .transactedAt(transactionDto.getTransactedAt())
+                    .build();
+        }
+    }
 }

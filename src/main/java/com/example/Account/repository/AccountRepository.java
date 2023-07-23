@@ -1,11 +1,8 @@
 package com.example.Account.repository;
 
 import com.example.Account.domain.Account;
-import com.example.Account.domain.AccountStatus;
 import com.example.Account.domain.AccountUser;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -29,5 +26,5 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
 
     List<Account> findByAccountUser(AccountUser accountUser);
 
-
+    boolean existsAccountByAccountNumber(String accountNumber);
 }

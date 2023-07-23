@@ -1,6 +1,6 @@
 package com.example.Account.dto;
 
-import com.example.Account.domain.Account;
+
 import lombok.*;
 
 import javax.validation.constraints.Min;
@@ -8,11 +8,9 @@ import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 public class CreateAccount {
-
     @Getter
     @Setter
     @AllArgsConstructor
-    @NoArgsConstructor
     public static class Request {
         @NotNull
         @Min(1)
